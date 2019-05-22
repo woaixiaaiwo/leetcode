@@ -1,0 +1,101 @@
+一 集合类：
+1.ArrayList和LinkedList区别
+
+ArrayList底层数组，随机访问快，更新删除慢
+LinkedList底层链表，更新删除快，随机访问慢
+
+2.HashMap底层原理
+
+jdk1.7之前，使用Entry数组，如有hash冲突，使用链表连接
+先使用hashcode方法，计算hashcode，和当前数据长度取余，计算位置。
+再用equals方法进行比较，如果存在，则替换
+
+jdk1.8以后，使用Entry数组，如有hash冲突，小于8个使用链表连接，大于等于8变成红黑树，小于等于6又变成链表
+红黑树怎么比较？先使用hashcode比较，如果hashcode一样，使用System.identityHashCode()方法
+计算地址值比较
+
+二 并发编程
+1.线程安全的集合类
+阻塞队列，BlockingQueue
+Vector，HashTable
+ConcurrentHashMap
+ConcurrentHashSet
+写时复制容器 CopyOnWriteList
+
+2.ConcurrentHashMap底层原理
+
+使用分段锁
+
+jdk1.7之前，使用Segment数组，大小为16，使用hashCode前23位定位，加锁。数据使用Entry数组，使用hashcode后8位定位
+
+jdk1.8以后，取消Segment数组，和HashMap一样，先定位Entry数组位置，然后在该位置加锁。但是，如果该位置当前无数据，会先
+使用CAS操作添加数据
+
+3.volatile关键字
+
+内存可见性和禁止重排序
+
+内存可见性是指，JMM规范中，每个线程拥有自己的工作内存，线程先从主存中load数据进行操作，然后选择一个时间把数据store到主存中。
+所以线程会使用自己工作线程的数据。一个线程修改数据，其他线程可能看不到修改
+volatile类型的变量，会使得缓存失效，即线程要从主存中读取数据，并且数据的修改要及时刷新到主存中
+
+禁止重排序：
+             普通读/写    volatile读  volatile写
+
+普通读/写       Y            Y           N
+
+volatile读      N           N           N
+
+volatile写      Y           N           N
+
+volatile写时，会在上面插入一个storestore屏障，防止与上面的普通读重排
+下面插入一个storeload屏障，防止与下面可能的volatile读/写重排
+
+volatile读时，会在下面插入一个loadload屏障，防止与下面的普通读重排，
+然后插入一个loadstore屏障，防止与普通写重排
+
+4.synchronized关键字
+
+对象头保存线程id，该线程获取锁。同事计数，进同步块计数加1，出同步块时计数减1。减到0释放锁
+偏向锁-》轻量级锁-》重量级锁
+  无锁-》CAS-》阻塞
+
+5.并发工具类？
+闭锁，栅栏，信号量
+闭锁和栅栏区别？
+闭锁由外部线程控制，比如A线程和B线程，B线程等待A线程的某些操作之后才执行，这时使用闭锁。闭锁只能使用一次
+栅栏用于一个线程组，所有的线程都在一个点同时执行，先到达的线程等待后到达的线程。所有线程都到达后，执行下面的任务
+信号量主要用于资源控制，多个线程争夺有限资源时使用。可以用于实现连接池，也可以用于限流操作。
+
+6.线程死锁，活锁，饥饿？
+线程死锁一般是由于线程获取锁的顺序不一致导致的，可以规定加锁顺序解决
+线程活锁指处理死锁不当，线程直接互相让步，导致没有线程执行任务。可以让一个线程释放资源，或者加上随机的休眠时间
+线程饥饿指的是有些线程获取不到cpu时间片，可以适当增加线程优先级
+
+7.线程池参数
+
+  ● int corePoolSize  ：线程池中核心线程数，小于 corePoolSize  ，就会创建新线程，等于 corePoolSize  ，这个任务就会保存到BlockingQueue，如果调用prestartAllCoreThreads（）方法就会一次性的启动corePoolSize个数的线程。
+
+  ● int maximumPoolSize, 允许的最大线程数，BlockingQueue也满了，小于 maximumPoolSize时候就会再次创建新的线程
+
+  ● long keepAliveTime, 线程空闲下来后，存活的时间，这个参数只在大于 corePoolSize才有用
+
+  ● TimeUnit unit, 存活时间的单位值
+
+  ● BlockingQueue<Runnable> workQueue, 保存任务的阻塞队列
+
+  ● ThreadFactory threadFactory, 创建线程的工厂，给新建的线程赋予名字
+
+  ● RejectedExecutionHandler handler ：饱和策略
+  1. AbortPolicy ：直接抛出异常，默认；
+  2. CallerRunsPolicy：用调用者所在的线程来执行任务
+  3. DiscardOldestPolicy：丢弃阻塞队列里最老的任务，队列里最靠前的任务
+  4. DiscardPolicy ：当前任务直接丢弃
+    实现自己的饱和策略，实现RejectedExecutionHandler接口即可
+
+1.如果当前线程数量小于corePoolSize，创建新线程执行任务
+2.如果当前线程数量大于等于corePoolSize，放入队列
+3.如果队列已满，但是没到maxPoolSize，创建新线程执行任务
+4.如果当前线程数大于等于maxPoolSize，执行拒绝策略
+5.如果线程从队列中取任务时超过keepAliveTime，表示当前线程需要被回收。线程池会先尝试使用CAS设置线程数为当前线程数减一，然后从工作线程的集合中移除该线程。如果回收的线程已经小于核心线程数了，而且allowCoreThreadTimeOut被配置为false，线程池会把当前线程数补充到核心线程数，如果allowCoreThreadTimeOut被设置为true，表示核心线程也可以回收，那么所有线程都会被回收，线程池会终止运行
+
