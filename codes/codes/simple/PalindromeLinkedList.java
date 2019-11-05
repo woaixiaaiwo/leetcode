@@ -11,6 +11,31 @@ public class PalindromeLinkedList {
           ListNode(int x) { val = x; }
     }
 
+
+    public static ListNode swapPairs(ListNode head) {
+        if(head == null)return null;
+        ListNode res = doSwap(head,head.next);
+        ListNode pre = head;
+        head = head.next;
+        while(head != null){
+            pre.next = doSwap(head,head.next == null?null:head.next);
+            pre = head;
+            head = head.next;
+        }
+        return res;
+    }
+
+    private static ListNode doSwap(ListNode l1,ListNode l2) {
+        if(l1 != null && l2 != null){
+            l1.next = l2.next;
+            l2.next = l1;
+        }
+        return l2==null?l1:l2;
+    }
+
+
+
+
     public static boolean isPalindrome(ListNode head) {
         if(head == null)return false;
         ListNode p1=head,p2=head;
@@ -68,20 +93,13 @@ public class PalindromeLinkedList {
 
     public static void main(String[] args) {
         ListNode l1 = new ListNode(1);
-        ListNode l2 = new ListNode(2);
-        ListNode l3 = new ListNode(2);
-        ListNode l4 = new ListNode(1);
-        /*ListNode l5 = new ListNode(2);
-        ListNode l6 = new ListNode(1);*/
-        l1.next = l2;
+        ListNode l2 = new ListNode(2);/*
+        ListNode l3 = new ListNode(3);
+        ListNode l4 = new ListNode(4);*/
+        l1.next = l2;/*
         l2.next = l3;
-        l3.next = l4;
-        /*l4.next = l5;
-        l5.next = l6;*/
-        /*printList(l1);
-        System.out.println();
-        printList(reverseLinkedList(l2,l4));*/
-        System.out.println(isPalindrome(l1));
+        l3.next = l4;*/
+        printList(swapPairs(l1));
     }
 
 }
