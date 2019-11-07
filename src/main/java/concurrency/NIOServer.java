@@ -91,7 +91,8 @@ public class NIOServer {
                 //设置为非阻塞的
                 sc.configureBlocking(false);
                 //连接已经完成了，可以开始关心读事件了
-                sc.register(selector,SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                sc.register(selector,SelectionKey.OP_READ);
+                PUSH_LIST.add(sc);
             }
             //读消息
             if(key.isReadable()){
@@ -123,11 +124,6 @@ public class NIOServer {
                     key.cancel();
                     sc.close();
                 }
-            }if(key.isWritable()){
-                System.out.println("数据准备完成，可以推送");
-                /*SocketChannel sc = (SocketChannel) key.channel();
-                PUSH_LIST.add(sc);
-                key.cancel();*/
             }
 
         }

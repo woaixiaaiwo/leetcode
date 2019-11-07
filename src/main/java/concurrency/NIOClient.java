@@ -7,73 +7,95 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Set;
 
 public class NIOClient {
 
-    private static Selector selector;
+    private String url;
 
-    private static SocketChannel socketChannel;
+    private Integer port;
 
-    public static void main(String[] args) throws Exception {
+    private volatile Boolean start = true;
+
+    private  Selector selector;
+
+    private  SocketChannel socketChannel;
+
+    public NIOClient(String url,Integer port){
+        this.url = url;
+        this.port = port;
         //创建选择器
-        selector = Selector.open();
-        //打开通道
-        socketChannel = SocketChannel.open();
-        //如果为 true，则此通道将被置于阻塞模式；
-        // 如果为 false，则此通道将被置于非阻塞模式
-        socketChannel.configureBlocking(false);
-
-
         try {
-            doConnect();
+            selector = Selector.open();
+            //打开通道
+            socketChannel = SocketChannel.open();
+            //如果为 true，则此通道将被置于阻塞模式；
+            // 如果为 false，则此通道将被置于非阻塞模式
+            socketChannel.configureBlocking(false);
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
         }
-        //循环遍历selector
-        while(true){
-            try {
-                //阻塞,只有当至少一个注册的事件发生的时候才会继续
-                selector.select();
-                //获取当前有哪些事件可以使用
-                Set<SelectionKey> keys = selector.selectedKeys();
-                //转换为迭代器
-                Iterator<SelectionKey> it = keys.iterator();
-                SelectionKey key = null;
-                while(it.hasNext()){
-                    key = it.next();
-                    it.remove();
+    }
+
+    public void close(){
+        start = false;
+    }
+
+    public void connect(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    doConnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                //循环遍历selector
+                while(start){
                     try {
-                        handleInput(key);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        if(key!=null){
-                            key.cancel();
-                            if(key.channel()!=null){
-                                key.channel().close();
+                        //阻塞,只有当至少一个注册的事件发生的时候才会继续
+                        selector.select();
+                        //获取当前有哪些事件可以使用
+                        Set<SelectionKey> keys = selector.selectedKeys();
+                        //转换为迭代器
+                        Iterator<SelectionKey> it = keys.iterator();
+                        SelectionKey key = null;
+                        while(it.hasNext()){
+                            key = it.next();
+                            it.remove();
+                            try {
+                                handleInput(key);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                if(key!=null){
+                                    key.cancel();
+                                    if(key.channel()!=null){
+                                        key.channel().close();
+                                    }
+                                }
                             }
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
-        //selector关闭后会自动释放里面管理的资源
-        /*if(selector!=null){
-            try {
-                selector.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                //selector关闭后会自动释放里面管理的资源
+                if(selector!=null){
+                    try {
+                        selector.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }*/
-
+        }).start();
     }
 
     //具体的事件处理方法
-    private static void handleInput(SelectionKey key) throws IOException{
+    private void handleInput(SelectionKey key) throws IOException{
         if(key.isValid()){
             //获得关心当前事件的channel
             SocketChannel sc = (SocketChannel)key.channel();
@@ -83,20 +105,6 @@ public class NIOClient {
                     socketChannel.register(selector, SelectionKey.OP_READ);
                 }
                 else{System.exit(1);}
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while(true){
-                            try {
-                                doWrite(socketChannel,"哈哈哈");
-                                Thread.sleep(1000);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                    }
-                }).start();
             }
             //有数据可读事件
             if(key.isReadable()){
@@ -125,7 +133,7 @@ public class NIOClient {
     }
 
     //发送消息
-    private static void doWrite(SocketChannel channel,String request)
+    private void doWrite(SocketChannel channel,String request)
             throws IOException {
         //将消息编码为字节数组
         byte[] bytes = request.getBytes();
@@ -139,7 +147,7 @@ public class NIOClient {
         channel.write(writeBuffer);
     }
 
-    private  static void doConnect() throws IOException {
+    private  void doConnect() throws IOException {
         /*如果此通道处于非阻塞模式，
         则调用此方法将启动非阻塞连接操作。
         如果立即建立连接，就像本地连接可能发生的那样，则此方法返回true。
@@ -154,8 +162,22 @@ public class NIOClient {
 
     //写数据对外暴露的API
     public void sendMsg(String msg) throws Exception{
-        //socketChannel.register(selector,SelectionKey.OP_READ);
         doWrite(socketChannel,msg);
+    }
+
+
+    public static void main(String[] args) throws Exception {
+        NIOClient nioClient = new NIOClient("127.0.0.1",8081);
+        nioClient.connect();
+        while (true){
+            Scanner scanner = new Scanner(System.in);
+            String text = scanner.next();
+            System.out.println(text);
+            if("quit".equals(text)){
+                break;
+            }
+            nioClient.sendMsg(text);
+        }
     }
 
 }
