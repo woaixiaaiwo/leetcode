@@ -16,8 +16,8 @@ public class RemoveDuplicatesFromSortedListII {
         ListNode(int x) { val = x; }
     }
 
-    public ListNode deleteDuplicates(ListNode head) {
+    /*public ListNode deleteDuplicates(ListNode head) {
 
-    }
+    }*/
 
 }
