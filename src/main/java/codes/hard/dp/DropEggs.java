@@ -26,24 +26,69 @@ public class DropEggs {
 
 
     public static int solution(int n,int k){
-
-        int[][] dp = new int[n][k];
-        for(int i=0;i<n;i++){
-            dp[i][0] = i+1;
-        }
-        for(int i=0;i<k;i++){
-            dp[0][i] = 1;
-        }
-
-        for(int i=1;i<n;i++){
-
+        //dp[i][j]表示i层楼，j个鸡蛋，最坏情况下要的最少次数
+        int[][] dp = new int[n+1][k+1];
+        //首先都初始化为最坏情况
+        for(int i=1;i<=n; i++){
+            for(int j=1; j<=k; j++)
+                dp[i][j] = i;
         }
 
+        //从第二层楼开始计算
+        for(int i=2;i<=n;i++){
+            //从两个鸡蛋开始计算
+            for(int j=2;j<=k;j++){
+                //对每一层楼，都计算它的最坏情况
+                //Math.max(dp[x-1][j-1],dp[i-x][j])+1表示碎/不碎对应的情况下的最坏次数
+                //min表示从所有的最坏次数中取最优的
+                for(int x=1;x<i;x++){
+                    dp[i][j]   = Math.min(dp[i][j] ,Math.max(dp[x-1][j-1],dp[i-x][j])+1);
+                }
+            }
+        }
 
+        return dp[n][k];
     }
 
+    //参考
+    /*public static int solution2(int eggNum, int floorNum){
+
+        int[][] cache = new int[eggNum+1][floorNum+1];
+
+        for(int i=1;i<=eggNum; i++){
+
+            for(int j=1; j<=floorNum; j++)
+
+                cache[i][j] = j;
+
+        }
+
+
+        for(int n=2; n<=eggNum; n++){
+
+            for(int m=1; m<=floorNum; m++){
+
+                for(int k=1; k<m; k++){
+
+                    //扔鸡蛋的楼层从1到m枚举一遍，如果当前算出的尝试次数小于上一次算出的尝试次数，则取代上一次的尝试次数。
+
+                    //这里可以打印k的值，从而知道第一个鸡蛋是从第几次扔的。
+
+                    cache[n][m] = Math.min(cache[n][m], 1+Math.max(cache[n-1][k-1],cache[n][m-k]));
+
+                }
+
+            }
+
+        }
+
+        return cache[eggNum][floorNum];
+    }*/
+
+
     public static void main(String[] args) {
-        //System.out.println(dp(20,2));
+        System.out.println(solution(70,65));
+        //System.out.println(solution2(65,70));
     }
 
 }
