@@ -31,11 +31,13 @@ package codes.hard.dp;
  * 链接：https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix
  */
 
-/**
- * 思路：dfs深度优先搜索+记忆化
- */
+
 public class LongestIncreasingPathInAMatrix {
 
+
+    /**
+     * 思路1：dfs深度优先搜索+记忆化
+     */
     //定义方向
     private static final int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
     private int m, n;
@@ -66,6 +68,56 @@ public class LongestIncreasingPathInAMatrix {
         }
         return ++cache[i][j];
     }
+
+
+
+
+
+    /**
+     * 思路2：记录元素值和元素位置i，j。通过元素值从小到大排序，元素值大的依赖元素值小的，进行dp
+     */
+    /*public int longestIncreasingPath(int[][] matrix) {
+        if(matrix == null || matrix.length == 0 || matrix[0] == null || matrix[0].length == 0)
+            return 0;
+        //元素入最小堆，数组下标0-value，数组下标1-matrix中y坐标，数组下标2-matrix中x坐标，最小堆以value排序
+        Queue<int[]> minDump = new PriorityQueue<int[]>((pre,next) -> pre[0] - next[0]);
+        for(int y = 0; y < matrix.length; y++){
+            for(int x = 0; x < matrix[0].length; x++){
+                minDump.offer(new int[]{matrix[y][x],y,x});
+            }
+        }
+        //dp(记录当前元素累积到的最大递增路径长度)
+        int[][] dp = new int[matrix.length][matrix[0].length];
+        //实时记录最大路径，作为返回值返回
+        int maxLength = 0;
+        //元素从小到大开始dp(保证大的元素排在小的元素后被累积)
+        while(minDump.size() > 0){
+            int[] curElement = minDump.poll();
+            int value = curElement[0];
+            int y = curElement[1];
+            int x = curElement[2];
+            int curMax = 1;
+            //四个方向比较最大路径(如果matrix元素大于周边的元素，则最长路径在周边dp的基础上+1)
+            if(y > 0 && value > matrix[y - 1][x])
+                curMax = Math.max(curMax,dp[y - 1][x] + 1);
+            if(y < matrix.length - 1 && value > matrix[y + 1][x])
+                curMax = Math.max(curMax,dp[y + 1][x] + 1);
+            if(x > 0 && value > matrix[y][x - 1])
+                curMax = Math.max(curMax,dp[y][x - 1] + 1);
+            if(x < matrix[0].length - 1 && value > matrix[y][x + 1])
+                curMax = Math.max(curMax,dp[y][x + 1] + 1);
+            //累积dp
+            dp[y][x] = curMax;
+            //实时记录最大值
+            maxLength = Math.max(maxLength,curMax);
+        }
+        return maxLength;
+    }
+
+    作者：fansir
+    链接：https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix/solution/javaban-chun-dp-by-fansir/
+    来源：力扣（LeetCode）
+    著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。*/
 
     public static void main(String[] args) {
         int[][] matrix = {
