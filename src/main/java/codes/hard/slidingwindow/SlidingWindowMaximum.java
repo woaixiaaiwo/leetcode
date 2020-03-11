@@ -1,4 +1,4 @@
-package codes.hard;
+package codes.hard.slidingwindow;
 
 import java.util.Arrays;
 import java.util.LinkedList;

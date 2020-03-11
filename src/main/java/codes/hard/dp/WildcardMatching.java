@@ -38,29 +38,32 @@ public class WildcardMatching {
 
     public boolean isMatch(String s, String p) {
         //1.定义状态数组 arr[i][j] 表示 s[0...i] 和 p[0...j]匹配
-        boolean[][] arr = new boolean[s.length()+1][p.length()+1];
+        int m = s.length(),n = p.length();
+        boolean[][] arr = new boolean[m+1][n+1];
+        //表示都是空字符串，匹配
         arr[0][0] = true;
-        int m = s.length(), n = p.length();
+        //状态转移方程定义：
+        //1.s[i] == p[j],那么arr[i][j]=arr[i-1][j-1]
+        //2.s[i] != p[j]
+        //2.2 p[j] == ? 那么 arr[i][j]=arr[i-1][j-1]
+        //2.3 p[j] == * 那么:
+        //2.3.1 *匹配空字符串 arr[i][j]=arr[i][j-1]
+        //2.3.2 *匹配单个字符串 arr[i][j]=arr[i-1][j-1]
+        //2.3.3 *匹配多个字符串 arr[i][j]=arr[i-1][j]
+        //初始化
         for(int i=1;i<=n;i++){
             if(p.charAt(i-1) == '*'){
                 arr[0][i] = arr[0][i-1];
             }
         }
-        //3.定义转移方程,即计算arr[i][j]的值
-        //3.1 如果p[i] == p[j] || p[j] == '?'，说明p[i]和p[j]匹配，此时只要判断p[i-1]和p[j-1]是否匹配即可，即arr[i][j] = arr[i-1][j-1]
-        //3.2 否则，如果p[j]='*'，此时有:
-        // 1.*匹配空字符串，此时有p[i][j] = p[i][j-1]
-        // 2.*匹配一个字符串，此时有p[i][j] = p[i-1][j-1]
-        // 3.*匹配多个字符串，此时有p[i][j] = p[i-1][j]
-        for(int i=0;i<m;i++){
-            for(int j=0;j<n;j++){
-                if(s.charAt(i) == p.charAt(j) || p.charAt(j) == '?'){
-                    arr[i+1][j+1] = arr[i][j];
-                }else if(p.charAt(j) == '*'){
-                    if(j == 0){
-                        arr[i+1][j+1] = true;
-                    }else {
-                        arr[i+1][j+1] = arr[i+1][j] || arr[i][j] || arr[i][j+1];
+
+        for(int i=1;i<=m;i++){
+            for(int j=1;j<=n;j++){
+                if(p.charAt(j-1) == s.charAt(i-1) || p.charAt(j-1) == '?'){
+                    arr[i][j] = arr[i-1][j-1];
+                }else{
+                    if(p.charAt(j-1) == '*'){
+                        arr[i][j] = arr[i][j-1] || arr[i-1][j-1] || arr[i-1][j];
                     }
                 }
             }
@@ -78,7 +81,7 @@ public class WildcardMatching {
     }
 
     public static void main(String[] args) {
-        System.out.println(new WildcardMatching().isMatch("","?"));
+        System.out.println(new WildcardMatching().isMatch("afdfdfsdfdfsdfdsfd","a*f"));
     }
 
 
