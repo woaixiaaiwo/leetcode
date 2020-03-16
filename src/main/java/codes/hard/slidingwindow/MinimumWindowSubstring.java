@@ -33,9 +33,6 @@ public class MinimumWindowSubstring {
                 }else {
                     windowMap.put(k,num+1);
                 }
-                if(k == 'a'){
-                    System.out.println(windowMap.get(k));
-                }
                 //如果个数匹配上了，match+1
                 if(needMap.get(k).equals(windowMap.get(k))){
                     match++;

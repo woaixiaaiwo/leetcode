@@ -1,16 +1,11 @@
 package codes.normal;
 
+import common.TreeNode;
+
 /**
  * @version ValidateBinarySearchTree, v1.0 2019/8/13 19:52
  */
 public class ValidateBinarySearchTree {
-
-    public class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
-        TreeNode(int x) { val = x; }
-    }
 
     public boolean helper(TreeNode node, Integer lower, Integer upper) {
         if (node == null) return true;

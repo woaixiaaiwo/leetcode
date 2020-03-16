@@ -145,7 +145,7 @@ public class MorrisTraversal {
 
     public static void main(String[] args) {
         MorrisTraversal morrisTraversal = new MorrisTraversal();
-        TreeNode treeNode = morrisTraversal.createTreeNode(new Integer[]{1,2,3,4,5,6});
+        TreeNode treeNode = morrisTraversal.createTreeNode(new Integer[]{1,2,3,4,5,6,null,null,null,null,7});
         System.out.println(morrisTraversal.recursiveTraversal(treeNode));
         System.out.println(morrisTraversal.stackTraversal(treeNode));
         System.out.println(morrisTraversal.inorderTraversal(treeNode));

@@ -1,6 +1,6 @@
 package codes.hard.traversal;
 
-import codes.normal.MorrisTraversal;
+import common.TreeNode;
 
 import java.util.*;
 
@@ -11,22 +11,6 @@ import java.util.*;
  * @version PostTraversal, v1.0 2019/10/16 13:57
  */
 public class PostTraversal {
-
-    public class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
-        TreeNode(int x) { val = x; }
-
-        @Override
-        public String toString() {
-            return "TreeNode{" +
-                    "val=" + val +
-                    ", left=" + left +
-                    ", right=" + right +
-                    '}';
-        }
-    }
 
     private List<Integer> list = new ArrayList<>();
 
