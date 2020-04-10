@@ -18,7 +18,7 @@ public class NextPpermutation {
 
         int size = nums.length;
         if(size > 1){
-            //先倒序找
+            //先倒序找，找到不是递增的区间
             int last = size-1, next = last,prev = next - 1,index;
             while(prev >= 0 && nums[prev] >= nums[next]){
                 prev --;
@@ -27,6 +27,7 @@ public class NextPpermutation {
             if(prev < 0 ){
                 reverse(nums,0,last);
             }else{
+                //找到不是递增的区间后，此时prev指针为较小值，从后面找到仅次于它的值，交换之后逆序后面的字符
                 index = next;
                 while(index<=last && nums[index] > nums[prev]){
                     index ++;
