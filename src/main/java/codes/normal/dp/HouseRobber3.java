@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * 计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。
  */
-public class HouseRobber {
+public class HouseRobber3 {
 
     public class TreeNode {
         int val;
